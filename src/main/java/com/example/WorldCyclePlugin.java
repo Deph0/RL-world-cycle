@@ -133,9 +133,9 @@ public class WorldCyclePlugin extends Plugin
 	GameState oneStatePrior = GameState.LOGGING_IN;
 	GameState twoStatesPrior = GameState.LOGGING_IN;
 
-	Color configWorldPanelColor,configPreviousWorldColor,configCurrentWorldColor,configNextWorldColor;
+	Color configWorldPanelColor,configPreviousWorldColor,configCurrentWorldColor,configNextWorldColor,configDimmerColor;
 	int configFontSize;
-	boolean configBoldFont,configDisplayPreviousWorld,configDisplayCurrentWorld,configDisplayNextWorld, configAutoHide;
+	boolean configBoldFont,configDisplayPreviousWorld,configDisplayCurrentWorld,configDisplayNextWorld,configDimmerOnHop,configAutoHide;
 	boolean overlayActive;
 	private Instant lastHopTime;
 
@@ -206,6 +206,11 @@ public class WorldCyclePlugin extends Plugin
 	public void onGameStateChanged(GameStateChanged event)
 	{
 		GameState state = event.getGameState();
+
+		if(configDimmerOnHop && state == GameState.HOPPING){
+			overlay.DrawDimmer(client.getCanvas().getSize());
+		}
+
 		if(oneStatePrior != state){
 			if(oneStatePrior == GameState.LOADING && twoStatesPrior == GameState.HOPPING){
 				//a world hop has occured and the world has loaded.
@@ -236,11 +241,13 @@ public class WorldCyclePlugin extends Plugin
 		configPreviousWorldColor = config.previousWorldColor();
 		configCurrentWorldColor = config.currentWorldColor();
 		configNextWorldColor = config.nextWorldColor();
+		configDimmerColor = config.dimmerColor();
 		configFontSize = config.fontSize();
 		configBoldFont = config.boldFont();
 		configDisplayPreviousWorld = config.displayPreviousWorld();
 		configDisplayCurrentWorld = config.displayCurrentWorld();
 		configDisplayNextWorld = config.displayNextWorld();
+		configDimmerOnHop = config.dimmerOnHop();
 		configAutoHide = config.enableAutoHide();
 
 		RefreshOverlay();
@@ -473,7 +480,7 @@ public class WorldCyclePlugin extends Plugin
 		rsWorld.setAddress(world.getAddress());
 		rsWorld.setId(world.getId());
 		rsWorld.setPlayerCount(world.getPlayers());
-		rsWorld.setLocation(world.getLocation());
+		rsWorld.setLocation(world.getRegion().getId());
 		rsWorld.setTypes(WorldUtil.toWorldTypes(world.getTypes()));
 
 		if (client.getGameState() == GameState.LOGIN_SCREEN)
